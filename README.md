@@ -1,160 +1,162 @@
-NETWORK PROTOCOL CLASSIFICATION FROM YOUTUBE LIVE PACKET CAPTURES
+# Network Protocol Classification from YouTube Live Packet Captures
 
-Author: Mounami Chowdhury
-Notebook: MounamiChowdhury_ML_Project1.ipynb
+**Author:** Mounami Chowdhury  
+**Notebook:** `MounamiChowdhury_ML_Project1.ipynb`
 
-=====================================================================
-ABOUT THE PROJECT
-=====================================================================
-A machine learning project that classifies network packets by protocol
-(TCP, UDP, QUIC, GQUIC, DNS, TLS, etc.) using packet-capture data
-collected during YouTube Live streaming sessions. Four classifiers are
-trained and compared: Logistic Regression, K-Nearest Neighbors,
-Decision Tree and Random Forest.
+## About the Project
 
-=====================================================================
-DATASET
-=====================================================================
-Source files: Multiple YouTube_Live_*.csv packet-capture exports
-(Wireshark-style), merged into a single file called merged_dataset.csv.
+This machine learning project classifies network packets by protocol using packet-capture data collected during YouTube Live streaming sessions.
 
-Size: about 6.26 million packets (6,262,725 rows after cleaning).
+Four classifiers are trained and compared:
 
-Columns:
-  No.          - Packet sequence number
-  Time         - Timestamp of the packet
-  Source       - Source IP address
-  Destination  - Destination IP address
-  Protocol     - Protocol of the packet (TARGET VARIABLE)
-  Length       - Packet length in bytes
-  Info         - Packet summary / details
+- Logistic Regression
+- K-Nearest Neighbors (KNN)
+- Decision Tree
+- Random Forest
 
-Protocols present (13): TCP, DNS, QUIC, GQUIC, TLSv1, TLSv1.3, UDP,
-DCP-AF, THRIFT, CLTP, ar_drone, R-GOOSE, MPEG TS.
+The project covers data loading, cleaning, exploratory data analysis, feature engineering, preprocessing, model training, and evaluation.
 
-Note: The raw CSV files and merged_dataset.csv are not included
-because of their size. Place them in the paths expected by the
-notebook (see "How to Run the Notebook" below).
+## Dataset
 
-=====================================================================
-WORKFLOW
-=====================================================================
-1. Data loading and merging
-   Reads all YouTube_Live_*.csv files (latin1 encoding, bad lines
-   skipped) and joins them into one DataFrame, saved as
-   merged_dataset.csv.
+**Source:** Multiple `YouTube_Live_*.csv` packet-capture exports.
 
-2. Data cleaning
-   Checks for missing values and drops 463 rows that have a missing
-   Info value.
+The CSV files are merged into a single dataset named `merged_dataset.csv`.
 
-3. Exploratory data analysis
-   - Protocol distribution (count plot and pie chart, with small
-     protocols grouped as "Other")
-   - Histograms, box plots, histogram with KDE, and density plot of
-     packet Length
+- **Dataset size:** Approximately 6.26 million packets
+- **Rows after cleaning:** 6,262,725, as recorded in the project description
 
-4. Feature engineering
-   The Time column is split into Hour, Minute and Second.
-   Features: Length, Hour, Minute, Second
-   Target: Protocol (label-encoded)
+### Columns
 
-5. Preprocessing
-   - Mean imputation (SimpleImputer)
-   - Removal of protocol classes with fewer than 2 samples so a
-     stratified split is possible
-   - 80/20 stratified train/test split (random_state = 42)
-   - Standardization (StandardScaler) for scale-sensitive models
+| Column | Description |
+|---|---|
+| `No.` | Packet sequence number |
+| `Time` | Packet timestamp |
+| `Source` | Source IP address |
+| `Destination` | Destination IP address |
+| `Protocol` | Packet protocol; target variable |
+| `Length` | Packet length in bytes |
+| `Info` | Packet summary or details |
 
-6. Modeling and evaluation
-   Four classifiers trained and evaluated using accuracy,
-   classification report and confusion matrix.
+### Protocol Classes
 
-=====================================================================
-MODELS AND RESULTS
-=====================================================================
-Model                  Key settings                  Test accuracy
----------------------  ----------------------------  -------------
-Logistic Regression    max_iter = 1000               91.6 - 92.6 %
-K-Nearest Neighbors    n_neighbors = 5               99.27 %
-Decision Tree          max_depth = 10                98.98 %
-Random Forest          n_estimators = 100,           97.94 %
-                       max_depth = 10
+The project description lists 13 protocol classes:
 
-The Logistic Regression figure differs slightly between cells because
-the train/test split was re-created in later cells after some rare
-classes were handled differently.
+TCP, DNS, QUIC, GQUIC, TLSv1, TLSv1.3, UDP, DCP-AF, THRIFT, CLTP, ar_drone, R-GOOSE, and MPEG TS.
 
-Important notes on interpreting these results:
+**Dataset availability:** The raw CSV files and `merged_dataset.csv` are not included in the repository because of their size. The source CSV files must be provided separately to reproduce the workflow.
 
-- The dataset is heavily imbalanced. GQUIC, UDP and QUIC make up
-  almost all packets, while classes like CLTP, R-GOOSE, TLSv1, THRIFT
-  and MPEG TS have only a handful of samples.
+## Project Workflow
 
-- Accuracy is dominated by the majority classes. For example,
-  Logistic Regression gets precision and recall of 0 on most minority
-  protocols and only predicts GQUIC and UDP. Macro-averaged F1 is
-  therefore low (about 0.15 for Logistic Regression, about 0.32 for
-  Random Forest) even though overall accuracy looks high.
+### 1. Data Loading and Merging
 
-- Features are limited. Only packet length and timestamp components
-  are used. Source/destination addresses and the Info field are not
-  used by the models, so they cannot reliably separate rare protocols.
+- Loads CSV files matching `YouTube_Live_*.csv`.
+- Uses Latin-1 encoding and skips malformed lines.
+- Combines the individual DataFrames into one dataset.
+- Saves the merged data as `merged_dataset.csv`.
 
-=====================================================================
-TECH STACK
-=====================================================================
+### 2. Data Cleaning
+
+- Checks for missing values.
+- Drops 463 rows with missing values in the `Info` column, as documented in the project.
+
+### 3. Exploratory Data Analysis
+
+The notebook explores protocol distribution and packet length using:
+
+- Protocol count plots and pie charts, with smaller classes grouped as `Other` for selected visualizations.
+- Packet-length histograms and box plots.
+- Histograms with kernel density estimation (KDE).
+- Density plots.
+
+### 4. Feature Engineering
+
+The `Time` column is split into `Hour`, `Minute`, and `Second`.
+
+- **Features:** `Length`, `Hour`, `Minute`, `Second`
+- **Target:** `Protocol`, label-encoded
+
+Source and destination IP addresses and the `Info` field are not used as model features in the described workflow.
+
+### 5. Preprocessing
+
+- Uses mean imputation with `SimpleImputer`.
+- Removes protocol classes with fewer than two samples for stratified splitting.
+- Uses an 80/20 stratified train/test split.
+- Applies feature standardization with `StandardScaler` for scale-sensitive models.
+
+The notebook documents `random_state=42` for the train/test split. Reproducibility also depends on whether the same data, class filtering, preprocessing, and split are used throughout the notebook.
+
+### 6. Model Training and Evaluation
+
+Four classifiers are trained and compared using test accuracy, classification reports, and confusion matrices.
+
+## Models and Results
+
+The following are the latest test accuracy values observed in the current Colab run.
+
+| Model | Key settings | Test accuracy |
+|---|---|---:|
+| Logistic Regression | `max_iter=1000` | 92.60% |
+| K-Nearest Neighbors | `n_neighbors=5` | 99.27% |
+| Decision Tree | `max_depth=10` | 98.98% |
+| Random Forest | `n_estimators=100`, `max_depth=10` | 98.27% |
+
+**Note on reproducibility:** Earlier notebook outputs showed Logistic Regression at 91.55% and Random Forest at 97.94%. These values changed when the notebook was rerun. The results should be treated as run-specific until the same dataset, preprocessing, class filtering, train/test split, and model settings have been verified across all evaluation cells.
+
+### Interpreting the Results
+
+The dataset is heavily imbalanced. GQUIC, UDP, and QUIC account for most packets, while protocols such as CLTP, R-GOOSE, TLSv1, THRIFT, and MPEG TS have relatively few samples.
+
+Consequently, high overall accuracy does not necessarily mean that every protocol is classified well. The notebook's classification reports show zero precision or recall for several minority classes in some model evaluations.
+
+Macro-averaged F1 and per-class recall are important complementary metrics because they help reveal poor performance on less frequent protocols. The project description records approximate macro-F1 values of 0.15 for Logistic Regression and 0.32 for Random Forest; these should be checked against the latest classification reports before being presented as final results.
+
+## Technology Stack
+
 - Python 3
-- pandas, NumPy
+- pandas
+- NumPy
 - scikit-learn
-- matplotlib, seaborn
-- Google Colab (the notebook was developed and run there, with Google
-  Drive mounted)
+- matplotlib
+- seaborn
+- Google Colab
 
-=====================================================================
-HOW TO RUN THE NOTEBOOK
-=====================================================================
-1. Open MounamiChowdhury_ML_Project1.ipynb in Google Colab or Jupyter.
+The notebook was developed and run in Google Colab, with Google Drive used in later data-loading steps.
 
-2. Upload the YouTube_Live_*.csv files to /content/ (the merge cell
-   uses glob('/content/YouTube_Live_*.csv')).
+## How to Run the Notebook
 
-3. Run the merge cells to create merged_dataset.csv, then copy it to
-   Google Drive at MyDrive/merged_dataset.csv. Later cells read it
-   from /content/drive/MyDrive/merged_dataset.csv.
+1. Open `MounamiChowdhury_ML_Project1.ipynb` in Google Colab or Jupyter.
+2. Upload the `YouTube_Live_*.csv` source files to `/content/` in Colab.
+3. Run the data-loading and merging cells to generate `merged_dataset.csv`.
+4. If later notebook cells read the merged file from Google Drive, place it at `MyDrive/merged_dataset.csv` and ensure the Drive-mounting cell has run.
+5. Run the remaining notebook cells in order.
 
-4. If you are not using Colab, remove the google.colab mount cell and
-   change the file paths to local ones.
+For a local environment, adapt the Google Colab and Google Drive file paths to your local directories.
 
-5. Run the remaining cells in order.
+### Install Dependencies
 
-To install dependencies for a local setup:
+```bash
+pip install pandas numpy scikit-learn matplotlib seaborn
+```
 
-   pip install pandas numpy scikit-learn matplotlib seaborn
+**Computational requirements:** Processing and modeling millions of packets can require substantial memory and execution time. KNN prediction and plotting on the full dataset may be particularly expensive. Use a sufficiently capable machine or a suitable Colab runtime, or evaluate on a carefully selected sample when appropriate.
 
-Note: KNN prediction and plotting on about 6 million rows need a lot
-of memory and time. Use a machine with plenty of RAM (or a Colab
-high-RAM runtime), or work on a sample of the data.
+## Possible Improvements
 
-=====================================================================
-POSSIBLE IMPROVEMENTS
-=====================================================================
-- Address class imbalance (class weights, SMOTE/oversampling, or
-  grouping rare protocols).
-- Report macro/weighted F1 and per-class recall as the main metrics
-  instead of accuracy alone.
-- Add more features such as ports, inter-arrival time between
-  packets, and encoded source/destination information.
-- Tune hyperparameters (for example, cross-validated search for k,
-  tree depth and number of trees).
-- Try gradient boosting models (XGBoost / LightGBM).
-- Check for data leakage and validate on separate capture sessions
-  instead of a random packet-level split, since neighbouring packets
-  in time are highly correlated.
+- Address class imbalance using class weights, oversampling, SMOTE where appropriate, or carefully justified grouping of rare protocols.
+- Report macro-F1, weighted-F1, and per-class recall alongside accuracy.
+- Engineer additional features such as ports and packet inter-arrival times, where available.
+- Tune hyperparameters using cross-validation.
+- Evaluate gradient boosting models such as XGBoost or LightGBM.
+- Investigate data leakage and evaluate on separate capture sessions rather than relying only on a random packet-level split, since nearby packets can be highly correlated.
 
-=====================================================================
-PROJECT STRUCTURE
-=====================================================================
-MounamiChowdhury_ML_Project1.ipynb   - Main notebook
-merged_dataset.csv                   - Generated merged dataset (not included)
-README.txt                           - This file
+## Project Structure
+
+```text
+Network-Protocol-Classification/
+├── MounamiChowdhury_ML_Project1.ipynb
+├── README.md
+└── merged_dataset.csv   # Generated locally; not included in the repository
+```
+
+The source CSV files and generated merged dataset must be supplied separately to reproduce the experiments.
